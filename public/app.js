@@ -428,8 +428,7 @@ const App = {
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:13.5px; background:var(--bg-subtle); padding:10px 14px; border-radius:8px; margin-bottom:12px;">
           <div>🎯 <strong>目标：</strong>${this.esc(ev.goals || ev.expected_students + '人')}</div>
           <div>👩‍🏫 <strong>待完成老师：</strong><span style="color:${Object.keys(teacherPendingMap).length ? '#B91C1C' : '#15803D'}; font-weight:700;">${this.esc(teacherPendingText)}</span></div>
-          <div>📦 <strong>材料：</strong>${s.unreadyCriticalMaterialsCount === 0 ? '<span style="color:#15803D; font-weight:700;">✓ 齐备</span>' : `<span style="color:#B91C1C; font-weight:700;">${s.unreadyCriticalMaterialsCount}项未齐</span>`}</div>
-          <div>🚀 <strong>开办状态：</strong>${s.criticalUnfinishedCount === 0 ? '<span style="color:#15803D; font-weight:800;">✓ 可正式开始</span>' : `<span style="color:#B91C1C; font-weight:800;">仍有${s.criticalUnfinishedCount}项关键未完</span> ${!ev.readiness_override_reason ? `<button class="btn btn-sm btn-warning no-print" style="padding:1px 7px; font-size:11px; margin-left:4px;" onclick="App.openReadinessOverrideModal()">特批推进</button>` : ''}`}</div>
+          <div>🚀 <strong>开办状态：</strong>${s.uncompletedRequiredChecklistCount === 0 ? '<span style="color:#15803D; font-weight:800;">✓ 可正式开始</span>' : `<span style="color:#B91C1C; font-weight:800;">仍有${s.uncompletedRequiredChecklistCount}项关键未完</span> ${!ev.readiness_override_reason ? `<button class="btn btn-sm btn-warning no-print" style="padding:1px 7px; font-size:11px; margin-left:4px;" onclick="App.openReadinessOverrideModal()">特批推进</button>` : ''}`}</div>
         </div>
 
         <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:6px; font-size:13.5px; font-weight:700;">
@@ -453,20 +452,17 @@ const App = {
         <button class="subnav-tab ${subTab === 'tasks' ? 'active' : ''}" onclick="App.switchEventTab('tasks')">
           👩‍🏫 2. 老师任务分配 (${d.tasks.length})
         </button>
-        <button class="subnav-tab ${subTab === 'materials' ? 'active' : ''}" onclick="App.switchEventTab('materials')">
-          📦 3. 材料清单与采购精算 (${d.materials.length})
-        </button>
         <button class="subnav-tab ${subTab === 'schedule' ? 'active' : ''}" onclick="App.switchEventTab('schedule')">
-          ⏱️ 4. 活动流程表 Run of Show (${d.schedules.length})
+          ⏱️ 3. 活动流程表 (${d.schedules.length})
         </button>
         <button class="subnav-tab ${subTab === 'registrations' ? 'active' : ''}" onclick="App.switchEventTab('registrations')">
-          🎓 5. 报名与签到 (${d.registrations.length})
+          🎓 4. 报名与签到 (${d.registrations.length})
         </button>
         <button class="subnav-tab ${subTab === 'marketing' ? 'active' : ''}" onclick="App.switchEventTab('marketing')">
-          📣 6. 非本院来源与跟进7步骤
+          📣 5. 非本院来源与跟进7步骤
         </button>
         <button class="subnav-tab ${subTab === 'finance' ? 'active' : ''}" onclick="App.switchEventTab('finance')">
-          💰 7. 活动预算与财务
+          💰 6. 活动预算与财务
         </button>
         <button class="subnav-tab ${subTab === 'review' ? 'active' : ''}" onclick="App.switchEventTab('review')">
           📝 8. 总结与复盘报告
