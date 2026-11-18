@@ -364,6 +364,22 @@ async function handleApi(req, res, parsedUrl) {
       return sendJson(res, 200, { user: updated });
     }
 
+    if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+      if (currentUser.role_id !== 'admin') {
+        return sendJson(res, 403, { error: '权限不足：只有 Admin／院长 可以删除老师账户' });
+      }
+      const targetId = pathname.split('/')[3];
+      if (targetId === currentUser.id || targetId === 'u-admin') {
+        return sendJson(res, 400, { error: '不能删除当前登录账号或系统主院长账号' });
+      }
+      const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+      if (!targetUser) return sendJson(res, 404, { error: '老师账户不存在' });
+
+      db.prepare('DELETE FROM users WHERE id = ?').run(targetId);
+      logAudit(currentUser, '', '老师与权限管理', '删除老师账户', `删除老师：${targetUser.name} (${targetUser.username})`);
+      return sendJson(res, 200, { deleted: true });
+    }
+
     // 2. Templates Management
     if (pathname === '/api/templates' && method === 'GET') {
       const templates = db.prepare('SELECT * FROM event_templates ORDER BY created_at ASC').all();

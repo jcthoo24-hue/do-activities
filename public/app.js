@@ -4216,8 +4216,11 @@ Object.assign(App, {
                            onchange="App.toggleUserPerm('${u.id}', 'can_view_sensitive_contacts', this.checked)" />
                     ${u.can_view_sensitive_contacts || u.role_id === 'admin' ? '允许看完整电话' : '脱敏隐藏'}
                   </td>
-                  <td>
+                  <td style="display:flex; gap:6px; align-items:center;">
                     <button class="btn btn-secondary btn-sm" onclick="App.switchUser('${u.id}')">以此身份体验</button>
+                    ${isAdmin && u.id !== 'u-admin' && u.id !== this.state.currentUser?.id ? `
+                      <button class="btn btn-danger btn-sm" onclick="App.openDeleteUserModal('${u.id}', '${this.esc(u.name)}')" title="删除老师">🗑️ 删除</button>
+                    ` : ''}
                   </td>
                 </tr>
               `).join('')}
@@ -4226,6 +4229,34 @@ Object.assign(App, {
         </div>
       </div>
     `;
+  },
+
+  openDeleteUserModal(userId, userName) {
+    const root = document.getElementById('app-modal-root');
+    root.style.display = 'block';
+    root.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel" style="max-width:420px;">
+          <h3 style="font-size:18px; font-weight:800; color:#B91C1C; margin-bottom:10px;">🗑️ 确认删除老师？</h3>
+          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:16px;">
+            您确定要删除老师账户 <strong>「${this.esc(userName)}」</strong> 吗？
+          </p>
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="btn btn-secondary" onclick="App.closeModal()">取消</button>
+            <button class="btn btn-danger" onclick="App.confirmDeleteUser('${userId}')">确认删除</button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  async confirmDeleteUser(userId) {
+    await this.api(`/api/users/${userId}`, { method: 'DELETE' });
+    this.closeModal();
+    this.toast('老师账户已删除');
+    await this.loadInitialData();
+    this.renderUserSelector();
+    this.renderUsersView();
   },
 
   async toggleUserPerm(userId, field, checked) {

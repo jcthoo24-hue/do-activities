@@ -295,6 +295,14 @@
       if (u) Object.assign(u, body);
       saveStore(store); return ok({ user: u });
     }
+    if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      if (id === currentUser.id || id === 'u-admin') {
+        return ok({ error: '不能删除当前登录账号或系统主院长账号' }, 400);
+      }
+      store.users = store.users.filter(x => x.id !== id);
+      saveStore(store); return ok({ deleted: true });
+    }
     if (pathname === '/api/templates') return ok({ templates: store.templates });
     if (pathname === '/api/events/next-code') {
       const y = params.get('year') || '2026';
