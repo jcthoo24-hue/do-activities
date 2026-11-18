@@ -1,0 +1,20 @@
+{
+  "name": "5plus1-event-sop-system",
+  "version": "1.0.0",
+  "description": "5+1 Education Group Event Management & SOP System",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --no-warnings server/index.js",
+    "dev": "node --no-warnings server/index.js",
+    "test": "node --no-warnings tests/e2e_test.js"
+  },
+  "keywords": [
+    "5+1",
+    "Education",
+    "SOP",
+    "Event Management",
+    "Ticklist"
+  ],
+  "author": "5+1 Education Group",
+  "license": "UNLICENSED"
+}

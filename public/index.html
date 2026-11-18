@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5+1 活动管理系统 | 5+1 Event Management &amp; SOP</title>
+  <meta name="description" content="5+1 Education Group 活动管理与执行系统 (Event Management & SOP System) - 数字化活动筹备、第一页Ticklist审核、老师任务同步、材料库存精算与历史档案管理。" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Fixed Navigation Sidebar (12 Modules per Section 2) -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-brand" id="brand-home-btn" onclick="App.navigate('dashboard')">
+        <div class="brand-logo-box">5+1</div>
+        <div class="brand-titles">
+          <h1>5+1 活动管理系统</h1>
+          <p>5+1 Event Management &amp; SOP</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="main-nav">
+        <button class="nav-item active" data-nav="dashboard" onclick="App.navigate('dashboard')">
+          <span class="nav-item-left"><span class="nav-icon">📊</span><span>1. 活动总览 Dashboard</span></span>
+        </button>
+        <button class="nav-item" data-nav="my-events" onclick="App.navigate('my-events')">
+          <span class="nav-item-left"><span class="nav-icon">🎯</span><span>2. 我的活动</span></span>
+        </button>
+        <button class="nav-item" data-nav="calendar" onclick="App.navigate('calendar')">
+          <span class="nav-item-left"><span class="nav-icon">📅</span><span>3. 活动日历 Calendar</span></span>
+        </button>
+        <button class="nav-item" data-nav="my-tasks" onclick="App.navigate('my-tasks')">
+          <span class="nav-item-left"><span class="nav-icon">✅</span><span>4. 我的任务</span></span>
+          <span class="nav-badge" id="nav-task-badge" style="display:none">0</span>
+        </button>
+        <button class="nav-item" data-nav="materials" onclick="App.navigate('materials')">
+          <span class="nav-item-left"><span class="nav-icon">📦</span><span>5. 材料与库存</span></span>
+        </button>
+        <button class="nav-item" data-nav="finance" onclick="App.navigate('finance')">
+          <span class="nav-item-left"><span class="nav-icon">💰</span><span>6. 费用与预算</span></span>
+        </button>
+        <button class="nav-item" data-nav="registrations" onclick="App.navigate('registrations')">
+          <span class="nav-item-left"><span class="nav-icon">🎓</span><span>7. 报名与参与记录</span></span>
+        </button>
+        <button class="nav-item" data-nav="archives" onclick="App.navigate('archives')">
+          <span class="nav-item-left"><span class="nav-icon">🗂️</span><span>8. 历史活动档案</span></span>
+        </button>
+        <button class="nav-item" data-nav="analytics" onclick="App.navigate('analytics')">
+          <span class="nav-item-left"><span class="nav-icon">📈</span><span>9. 统计报告</span></span>
+        </button>
+        <button class="nav-item" data-nav="templates" onclick="App.navigate('templates')">
+          <span class="nav-item-left"><span class="nav-icon">📋</span><span>10. SOP模板管理</span></span>
+        </button>
+        <button class="nav-item" data-nav="users" onclick="App.navigate('users')">
+          <span class="nav-item-left"><span class="nav-icon">👥</span><span>11. 老师与权限管理</span></span>
+        </button>
+        <button class="nav-item" data-nav="settings" onclick="App.navigate('settings')">
+          <span class="nav-item-left"><span class="nav-icon">⚙️</span><span>12. 系统设置</span></span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div style="font-size:12px; font-weight:700; color:var(--text-secondary);">5+1 Education Group</div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">SQLite 实时持久化 · 全端同步</div>
+      </div>
+    </aside>
+
+    <!-- Main Right Content Area -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobile-menu-toggle" onclick="App.toggleMobileMenu()">☰</button>
+          <div id="breadcrumb-bar" style="font-weight:700; font-size:15px; color:var(--text-primary);">
+            活动总览 Dashboard
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="btn btn-primary btn-sm" id="top-create-event-btn" onclick="App.openCreateEventModal()">
+            ＋ 建立新活动
+          </button>
+
+          <div class="role-switcher" title="切换当前登录身份以体验不同权限视角">
+            <span>👤 当前账号：</span>
+            <select id="current-user-select" onchange="App.switchUser(this.value)"></select>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content" id="app-main-view">
+        <div class="card">正在加载 5+1 活动管理系统数据...</div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Global Modal Container -->
+  <div id="app-modal-root" style="display:none;"></div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
