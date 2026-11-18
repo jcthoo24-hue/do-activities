@@ -379,6 +379,82 @@
       saveStore(store);
       return ok({ event: ev });
     }
+    if (pathname.match(/^\/api\/events\/[^/]+$/) && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      store.events = store.events.filter(e => e.id !== id);
+      store.checklistItems = store.checklistItems.filter(i => i.event_id !== id);
+      store.tasks = store.tasks.filter(t => t.event_id !== id);
+      store.eventMaterials = store.eventMaterials.filter(m => m.event_id !== id);
+      store.schedules = store.schedules.filter(s => s.event_id !== id);
+      store.registrations = store.registrations.filter(r => r.event_id !== id);
+      store.marketingSources = store.marketingSources.filter(m => m.event_id !== id);
+      store.followUps = store.followUps.filter(f => f.event_id !== id);
+      store.budgets = store.budgets.filter(b => b.event_id !== id);
+      store.expenses = store.expenses.filter(x => x.event_id !== id);
+      store.attachments = store.attachments.filter(a => a.event_id !== id);
+      store.reviews = store.reviews.filter(r => r.event_id !== id);
+      saveStore(store);
+      return ok({ deleted: true });
+    }
+    if (pathname === '/api/checklist-items' && method === 'POST') {
+      const chkId = uid('chk');
+      const item = {
+        id: chkId, event_id: body.event_id, stage: body.stage || 'A', sort_order: 99,
+        title: body.title, category_tag: body.category_tag || '自定义', assignee_id: body.assignee_id || currentUser.id,
+        due_date: body.due_date || '', status: '未开始', is_checked: 0, is_required: body.is_required ? 1 : 0,
+        allow_repeat: body.allow_repeat ? 1 : 0, repeat_records: [], notes: body.notes || '', approval_status: '待提交'
+      };
+      store.checklistItems.push(item);
+      store.tasks.push({ id: uid('tsk'), event_id: body.event_id, checklist_item_id: chkId, title: body.title, stage: item.stage, assignee_id: item.assignee_id, due_date: item.due_date, priority: '中', status: '未开始', approval_status: '待提交' });
+      saveStore(store);
+      return ok({ item }, 201);
+    }
+    if (pathname.match(/^\/api\/checklist-items\/[^/]+$/) && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      store.checklistItems = store.checklistItems.filter(i => i.id !== id);
+      store.tasks = store.tasks.filter(t => t.checklist_item_id !== id);
+      saveStore(store);
+      return ok({ deleted: true });
+    }
+    if (pathname.match(/^\/api\/event-materials\/[^/]+$/) && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      store.eventMaterials = store.eventMaterials.filter(m => m.id !== id);
+      saveStore(store);
+      return ok({ deleted: true });
+    }
+    if (pathname === '/api/schedules' && method === 'POST') {
+      const s = { id: uid('ros'), sort_order: 99, status: '未开始', is_completed: 0, ...body };
+      store.schedules.push(s); saveStore(store); return ok({ schedule: s }, 201);
+    }
+    if (pathname.match(/^\/api\/schedules\/[^/]+$/) && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      store.schedules = store.schedules.filter(s => s.id !== id);
+      saveStore(store); return ok({ deleted: true });
+    }
+    if (pathname === '/api/expenses' && method === 'POST') {
+      const ex = { id: uid('exp'), paid_by: currentUser.name, status: '已核销', ...body };
+      store.expenses.push(ex); saveStore(store); return ok({ expense: ex }, 201);
+    }
+    if (pathname === '/api/attachments' && method === 'POST') {
+      const att = { id: uid('att'), uploaded_by: currentUser.id, uploaded_by_name: currentUser.name, uploaded_at: new Date().toISOString().slice(0, 10), ...body };
+      store.attachments.push(att); saveStore(store); return ok({ attachment: att }, 201);
+    }
+    if (pathname.match(/^\/api\/attachments\/[^/]+$/) && method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      store.attachments = store.attachments.filter(a => a.id !== id);
+      saveStore(store); return ok({ deleted: true });
+    }
+    if (pathname.match(/^\/api\/events\/[^/]+\/review$/) && method === 'POST') {
+      const id = pathname.split('/')[3];
+      const idx = store.reviews.findIndex(r => r.event_id === id);
+      const rev = { event_id: id, ...body, reviewed_by: currentUser.name, reviewed_at: new Date().toISOString().slice(0, 10) };
+      if (idx >= 0) store.reviews[idx] = rev; else store.reviews.push(rev);
+      if (body.archive_event) {
+        const ev = store.events.find(e => e.id === id);
+        if (ev) ev.status = '已归档';
+      }
+      saveStore(store); return ok({ review: rev });
+    }
     if (pathname.match(/^\/api\/checklist-items\/[^/]+$/) && method === 'PUT') {
       const id = pathname.split('/')[3];
       const item = store.checklistItems.find(i => i.id === id);

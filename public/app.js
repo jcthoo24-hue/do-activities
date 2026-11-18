@@ -268,105 +268,82 @@ const App = {
     const myTasks = (this.state.allTasks || []).filter(t => t.assignee_id === this.state.currentUser?.id);
     const myTodayTasks = myTasks.filter(t => t.status !== '已完成' && t.due_date === today);
     const myOverdueTasks = myTasks.filter(t => t.status !== '已完成' && t.due_date && t.due_date < today);
-    const myUpcomingTasks = myTasks.filter(t => t.status !== '已完成' && t.due_date > today && t.due_date <= next7);
 
     main.innerHTML = `
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">${onlyMine ? '我参与的活动总数' : '系统活动档案总数'}</div>
+          <div class="kpi-label">活动总数</div>
           <div class="kpi-value">${totalEvents}</div>
-          <div class="kpi-sub">永久保存 · 独立编号可追溯</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">筹备／进行中活动</div>
+          <div class="kpi-label">筹备／进行中</div>
           <div class="kpi-value" style="color:var(--brand-red);">${activeEvents}</div>
-          <div class="kpi-sub">点击任意活动直达第一页 Ticklist</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">待主管审核项目</div>
+          <div class="kpi-label">待主管审核</div>
           <div class="kpi-value" style="color:#B45309;">${totalPendingReview}</div>
-          <div class="kpi-sub">两层确认机制保障执行质量</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">逾期未完成SOP项目</div>
+          <div class="kpi-label">逾期未完成项</div>
           <div class="kpi-value" style="color:#B91C1C;">${totalOverdue}</div>
-          <div class="kpi-sub">我的逾期任务: ${myOverdueTasks.length} 项 | 未来7天: ${myUpcomingTasks.length} 项</div>
         </div>
       </div>
 
       ${(myOverdueTasks.length > 0 || myTodayTasks.length > 0) ? `
         <div class="alert-box alert-warning">
-          <div>
-            <strong>🔔 站内任务提醒（${this.esc(this.state.currentUser?.name)}）：</strong>
-            您当前有 <strong>${myOverdueTasks.length}</strong> 项逾期任务、<strong>${myTodayTasks.length}</strong> 项今日到期任务、<strong>${myUpcomingTasks.length}</strong> 项未来7天任务。
-          </div>
-          <button class="btn btn-sm btn-secondary" onclick="App.navigate('my-tasks')">前往我的任务处理</button>
+          <div>🔔 <strong>我的待办提醒：</strong> 您有 ${myOverdueTasks.length} 项逾期任务、${myTodayTasks.length} 项今日到期任务。</div>
+          <button class="btn btn-sm btn-secondary" onclick="App.navigate('my-tasks')">处理我的任务</button>
         </div>
       ` : ''}
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <span>${onlyMine ? '🎯 我负责／参与的活动列表' : '📌 5+1 全部活动总览（点击进入第一页执行总 Ticklist）'}</span>
-          </div>
+          <div class="card-title">📌 活动列表（点击任意活动直接进入 Ticklist）</div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="App.navigate('archives')">🔍 按年份/月份搜索历史档案</button>
-            <button class="btn btn-primary btn-sm" onclick="App.openCreateEventModal()">＋ 建立新活动</button>
+            <button class="btn btn-sm ${!onlyMine ? 'btn-primary' : 'btn-secondary'}" onclick="App.renderDashboard(false)">全部活动</button>
+            <button class="btn btn-sm ${onlyMine ? 'btn-primary' : 'btn-secondary'}" onclick="App.renderDashboard(true)">只看我的活动</button>
+            <button class="btn btn-primary btn-sm" onclick="App.openCreateEventModal()">＋ 新建活动</button>
           </div>
         </div>
 
-        ${events.length === 0 ? `<p style="padding:20px; color:var(--text-muted);">暂无活动记录，请点击右上角「建立新活动」。</p>` : `
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:16px;">
+        ${events.length === 0 ? `<p style="padding:20px; color:var(--text-muted);">暂无活动记录，请点击右上角「＋ 新建活动」。</p>` : `
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(350px, 1fr)); gap:16px;">
             ${events.map(ev => {
               const s = ev.summary || {};
               return `
                 <div class="card" style="margin-bottom:0; border-top:4px solid ${ev.status === '已结束' || ev.status === '已归档' ? '#16A34A' : 'var(--brand-red)'}; display:flex; flex-direction:column; justify-content:space-between;">
                   <div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;">
-                      <div>
-                        <span style="font-size:12px; font-weight:700; color:var(--brand-red); background:var(--brand-red-light); padding:2px 8px; border-radius:4px;">${this.esc(ev.event_code)}</span>
-                        <span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${this.esc(ev.category)} · ${this.esc(ev.branch)}</span>
-                      </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+                      <span style="font-size:12px; font-weight:700; color:var(--brand-red); background:var(--brand-red-light); padding:2px 8px; border-radius:4px;">${this.esc(ev.event_code)} · ${this.esc(ev.category)}</span>
                       <span class="status-pill ${ev.status === '已结束' || ev.status === '已归档' ? 'status-completed' : 'status-progress'}">${this.esc(ev.status)}</span>
                     </div>
 
-                    <h3 style="font-size:18px; font-weight:800; margin-bottom:6px; cursor:pointer; color:var(--text-primary);" onclick="App.openEvent('${ev.id}', 'ticklist')">
+                    <h3 style="font-size:18px; font-weight:800; margin-bottom:8px; cursor:pointer; color:var(--text-primary);" onclick="App.openEvent('${ev.id}', 'ticklist')">
                       ${this.esc(ev.name)}
                     </h3>
 
-                    <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-                      <div>📅 日期：<strong>${this.esc(ev.start_date)}</strong></div>
-                      <div>👤 负责人：<strong>${this.esc(ev.leader_name)}</strong></div>
-                      <div>📍 地点：${this.esc(ev.location)}</div>
-                      <div>🎓 报名/预计：<strong>${s.activeRegistrations || 0} / ${ev.expected_students}人</strong></div>
+                    <div style="font-size:13px; color:var(--text-secondary); margin-bottom:12px; display:flex; flex-direction:column; gap:3px;">
+                      <div>📅 ${this.esc(ev.start_date)} ｜ 📍 ${this.esc(ev.location)}</div>
+                      <div>👤 负责人：<strong>${this.esc(ev.leader_name)}</strong> ｜ 🎓 已报名：<strong>${s.activeRegistrations || 0} / ${ev.expected_students}人</strong></div>
                     </div>
 
-                    <div style="margin-bottom:10px;">
+                    <div style="margin-bottom:12px;">
                       <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:4px;">
-                        <span>SOP Ticklist 完成度 (${s.completedItems}/${s.totalItems}项)</span>
+                        <span>Ticklist 进度 (${s.completedItems}/${s.totalItems})</span>
                         <span style="color:var(--brand-red);">${s.completionPct}%</span>
                       </div>
                       <div class="progress-track">
                         <div class="progress-fill" style="width:${s.completionPct}%;"></div>
                       </div>
                     </div>
-
-                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
-                      <span class="status-pill status-completed">已完成 ${s.completedItems}</span>
-                      <span class="status-pill status-pending">未完成 ${s.uncompletedItems}</span>
-                      ${s.overdueItems > 0 ? `<span class="status-pill status-overdue">逾期 ${s.overdueItems}</span>` : ''}
-                      ${s.pendingApprovalItems > 0 ? `<span class="status-pill status-review">待审 ${s.pendingApprovalItems}</span>` : ''}
-                      ${ev.followup_completed ? `<span class="status-pill status-completed">跟进已完成</span>` : `<span class="status-pill status-review">跟进进行中</span>`}
-                    </div>
                   </div>
 
-                  <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--border-color); gap:8px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--border-color); gap:6px;">
                     <button class="btn btn-primary btn-sm" style="flex:1;" onclick="App.openEvent('${ev.id}', 'ticklist')">
-                      📋 进入第一页：活动执行总 Ticklist
+                      📋 打开 Ticklist
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')" title="复制此活动为新活动">
-                      📑 复制
-                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')" title="复制活动">📑 复制</button>
+                    <button class="btn btn-danger btn-sm" onclick="App.openDeleteEventModal('${ev.id}', '${this.esc(ev.name)}')" title="删除活动">🗑️</button>
                   </div>
                 </div>
               `;
@@ -375,6 +352,35 @@ const App = {
         `}
       </div>
     `;
+  },
+
+  openDeleteEventModal(eventId, eventName) {
+    const root = document.getElementById('app-modal-root');
+    root.style.display = 'block';
+    root.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel" style="max-width:440px;">
+          <h3 style="font-size:18px; font-weight:800; color:#B91C1C; margin-bottom:10px;">🗑️ 确认删除活动？</h3>
+          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:16px;">
+            您确定要永久删除活动 <strong>「${this.esc(eventName)}」</strong> 吗？<br/>
+            删除后，该活动的 Ticklist、任务、材料和报名记录将一并移除且无法恢复。
+          </p>
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="btn btn-secondary" onclick="App.closeModal()">取消</button>
+            <button class="btn btn-danger" onclick="App.confirmDeleteEvent('${eventId}')">确认永久删除</button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  async confirmDeleteEvent(eventId) {
+    await this.api(`/api/events/${eventId}`, { method: 'DELETE' });
+    this.closeModal();
+    this.toast('活动已永久删除');
+    this.state.currentEventId = null;
+    this.state.currentEventData = null;
+    await this.navigate('dashboard');
   },
 
   // ============================================================================
@@ -388,7 +394,6 @@ const App = {
     const s = d.summary;
     const subTab = this.state.eventSubTab || 'ticklist';
 
-    // Identify teachers who still have uncompleted tasks
     const teacherPendingMap = {};
     (d.checklistItems || []).forEach(item => {
       if (!item.is_checked && item.status !== '已完成' && item.status !== '不适用') {
@@ -397,95 +402,50 @@ const App = {
       }
     });
     const teacherPendingText = Object.entries(teacherPendingMap)
-      .map(([name, cnt]) => `${name} (${cnt}项未完)`)
-      .join('、') || '全部老师均已完成交办事项！';
+      .map(([name, cnt]) => `${name} (${cnt}项)`)
+      .join('、') || '全部已完成';
 
     main.innerHTML = `
-      <!-- Top Event Summary & Readiness Banner (Answers all 10 core questions immediately on Page 1!) -->
       <div class="event-hero-banner">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
           <div>
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
-              <span style="background:var(--brand-red); color:#fff; font-weight:800; font-size:13px; padding:3px 10px; border-radius:6px;">${this.esc(ev.event_code)}</span>
-              <span class="status-pill status-progress">活动状态：${this.esc(ev.status)}</span>
-              <span class="status-pill ${ev.followup_completed || s.stageCCompleted ? 'status-completed' : 'status-review'}">
-                ${ev.followup_completed || s.stageCCompleted ? '✓ 阶段C跟进已完成' : '⏳ 阶段C跟进未全部完成（活动结束≠跟进完成）'}
-              </span>
-              <span style="font-size:13px; color:var(--text-secondary);">类别：<strong>${this.esc(ev.category)}</strong> | 分行：<strong>${this.esc(ev.branch)}</strong></span>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span style="background:var(--brand-red); color:#fff; font-weight:800; font-size:12.5px; padding:2px 9px; border-radius:6px;">${this.esc(ev.event_code)}</span>
+              <span class="status-pill status-progress">${this.esc(ev.status)}</span>
+              <span style="font-size:13px; color:var(--text-secondary);">📅 ${this.esc(ev.start_date)} ${this.esc(ev.start_time)}-${this.esc(ev.end_time)} ｜ 📍 ${this.esc(ev.location)} ｜ 👤 ${this.esc(ev.leader_name)}</span>
             </div>
-            <h1 style="font-size:24px; font-weight:900; color:var(--text-primary);">${this.esc(ev.name)}</h1>
-            ${ev.theme ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:2px;">主题：${this.esc(ev.theme)}</div>` : ''}
+            <h1 style="font-size:23px; font-weight:900; color:var(--text-primary);">${this.esc(ev.name)}</h1>
           </div>
 
-          <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="App.openEditEventModal()">✏️ 编辑活动资料/状态</button>
-            <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')">📑 复制为新活动</button>
-            <button class="btn btn-secondary btn-sm" onclick="App.saveEventAsTemplate('${ev.id}')">⭐ 存为SOP模板</button>
-            <button class="btn btn-primary btn-sm" onclick="App.openPrintCenterModal()">🖨️ A4打印与导出 (PDF/Excel)</button>
+          <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="App.openEditEventModal()">✏️ 编辑</button>
+            <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')">📑 复制</button>
+            <button class="btn btn-primary btn-sm" onclick="App.openPrintCenterModal()">🖨️ 打印 / 导出</button>
+            <button class="btn btn-danger btn-sm" onclick="App.openDeleteEventModal('${ev.id}', '${this.esc(ev.name)}')">🗑️ 删除活动</button>
           </div>
         </div>
 
-        <!-- Immediate 10-Question Operational Matrix -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; background:var(--bg-subtle); padding:14px; border-radius:8px; border:1px solid var(--border-color); font-size:13.5px; margin-bottom:14px;">
-          <div>📅 <strong>举行日期与时间：</strong><br/>${this.esc(ev.start_date)} ${ev.end_date !== ev.start_date ? `至 ${this.esc(ev.end_date)}` : ''} (${this.esc(ev.start_time)} - ${this.esc(ev.end_time)})</div>
-          <div>📍 <strong>地点与负责人：</strong><br/>${this.esc(ev.location)} | 负责人：<strong>${this.esc(ev.leader_name)}</strong></div>
-          <div>🎯 <strong>活动目标：</strong><br/>${this.esc(ev.goals || '招收 ' + ev.expected_students + ' 名学生，推动非本院生转化')}</div>
-          <div>👩‍🏫 <strong>哪个老师还没交代/完成：</strong><br/><span style="color:${Object.keys(teacherPendingMap).length ? '#B91C1C' : '#15803D'}; font-weight:700;">${this.esc(teacherPendingText)}</span></div>
-          <div>📦 <strong>材料是否准备齐全：</strong><br/>${s.unreadyCriticalMaterialsCount === 0 ? '<span style="color:#15803D; font-weight:700;">✓ 所有关键材料已准备完成</span>' : `<span style="color:#B91C1C; font-weight:700;">⚠️ 仍有 ${s.unreadyCriticalMaterialsCount} 项关键材料未准备完成</span>`}</div>
-          <div>🚀 <strong>活动是否可以正式开始：</strong><br/>
-            ${s.criticalUnfinishedCount === 0
-              ? '<span style="color:#15803D; font-weight:800;">✓ 全部关键准备就绪，可以正式开始！</span>'
-              : `<span style="color:#B91C1C; font-weight:800;">⚠️ 仍有 ${s.criticalUnfinishedCount} 项关键准备未完成</span>
-                 ${ev.readiness_override_reason ? `<div style="font-size:12px; color:#B45309;">已记录原因继续推进：${this.esc(ev.readiness_override_reason)} (${this.esc(ev.readiness_override_by)})</div>` : `<button class="btn btn-sm btn-warning no-print" style="margin-top:4px; padding:2px 8px; font-size:11.5px;" onclick="App.openReadinessOverrideModal()">记录原因继续推进</button>`}`
-            }
-          </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:13.5px; background:var(--bg-subtle); padding:10px 14px; border-radius:8px; margin-bottom:12px;">
+          <div>🎯 <strong>目标：</strong>${this.esc(ev.goals || ev.expected_students + '人')}</div>
+          <div>👩‍🏫 <strong>待完成老师：</strong><span style="color:${Object.keys(teacherPendingMap).length ? '#B91C1C' : '#15803D'}; font-weight:700;">${this.esc(teacherPendingText)}</span></div>
+          <div>📦 <strong>材料：</strong>${s.unreadyCriticalMaterialsCount === 0 ? '<span style="color:#15803D; font-weight:700;">✓ 齐备</span>' : `<span style="color:#B91C1C; font-weight:700;">${s.unreadyCriticalMaterialsCount}项未齐</span>`}</div>
+          <div>🚀 <strong>开办状态：</strong>${s.criticalUnfinishedCount === 0 ? '<span style="color:#15803D; font-weight:800;">✓ 可正式开始</span>' : `<span style="color:#B91C1C; font-weight:800;">仍有${s.criticalUnfinishedCount}项关键未完</span> ${!ev.readiness_override_reason ? `<button class="btn btn-sm btn-warning no-print" style="padding:1px 7px; font-size:11px; margin-left:4px;" onclick="App.openReadinessOverrideModal()">特批推进</button>` : ''}`}</div>
         </div>
 
-        <!-- 6 Core Ticklist Metrics + Real-time Progress Bar (Section 4) -->
-        <div class="kpi-grid" style="margin-bottom:12px;">
-          <div class="kpi-card" style="padding:10px 14px;">
-            <div class="kpi-label">总检查项目数量</div>
-            <div class="kpi-value" style="font-size:22px;">${s.totalItems}</div>
-          </div>
-          <div class="kpi-card" style="padding:10px 14px; border-left:4px solid #16A34A;">
-            <div class="kpi-label">已完成项目数量</div>
-            <div class="kpi-value" style="font-size:22px; color:#15803D;">${s.completedItems}</div>
-          </div>
-          <div class="kpi-card" style="padding:10px 14px; border-left:4px solid #64748B;">
-            <div class="kpi-label">未完成项目数量</div>
-            <div class="kpi-value" style="font-size:22px;">${s.uncompletedItems}</div>
-          </div>
-          <div class="kpi-card" style="padding:10px 14px; border-left:4px solid #DC2626;">
-            <div class="kpi-label">逾期项目数量</div>
-            <div class="kpi-value" style="font-size:22px; color:#B91C1C;">${s.overdueItems}</div>
-          </div>
-          <div class="kpi-card" style="padding:10px 14px; border-left:4px solid #D97706;">
-            <div class="kpi-label">待审核项目数量</div>
-            <div class="kpi-value" style="font-size:22px; color:#B45309;">${s.pendingApprovalItems}</div>
-          </div>
-          <div class="kpi-card" style="padding:10px 14px; border-left:4px solid var(--brand-red);">
-            <div class="kpi-label">实时完成百分比</div>
-            <div class="kpi-value" style="font-size:22px; color:var(--brand-red);">${s.completionPct}%</div>
-          </div>
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:6px; font-size:13.5px; font-weight:700;">
+          <span>总项目：${s.totalItems}</span>
+          <span style="color:#15803D;">✓ 已完成：${s.completedItems}</span>
+          <span>○ 未完成：${s.uncompletedItems}</span>
+          ${s.overdueItems > 0 ? `<span style="color:#B91C1C;">● 逾期：${s.overdueItems}</span>` : ''}
+          ${s.pendingApprovalItems > 0 ? `<span style="color:#B45309;">⏳ 待审核：${s.pendingApprovalItems}</span>` : ''}
+          <span style="margin-left:auto; color:var(--brand-red); font-size:16px;">完成度 ${s.completionPct}%</span>
         </div>
 
         <div class="progress-track">
           <div class="progress-fill" style="width:${s.completionPct}%;"></div>
         </div>
-
-        <!-- Automatic Risk Warnings Strip (Section 18.2) -->
-        ${(s.risks && s.risks.length > 0) ? `
-          <div style="margin-top:14px; display:flex; flex-direction:column; gap:6px;">
-            ${s.risks.map(r => `
-              <div style="font-size:13px; padding:7px 12px; border-radius:6px; background:${r.level === 'danger' ? '#FEF2F2' : '#FFFBEB'}; border:1px solid ${r.level === 'danger' ? '#FCA5A5' : '#FCD34D'}; color:${r.level === 'danger' ? '#991B1B' : '#92400E'}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <span><strong>⚡ 风险提醒 · ${this.esc(r.title)}：</strong> ${this.esc(r.detail)}</span>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
       </div>
 
-      <!-- Event Module Navigation Bar (First Tab is ALWAYS 活动执行总 Ticklist) -->
       <div class="event-subnav no-print">
         <button class="subnav-tab ${subTab === 'ticklist' ? 'active' : ''}" onclick="App.switchEventTab('ticklist')">
           ☑️ 1. 活动执行总 Ticklist (第一页核心)
@@ -4076,8 +4036,9 @@ Object.assign(App, {
                   <td><strong>${ev.summary?.completionPct || 0}%</strong></td>
                   <td><span class="status-pill ${ev.status === '已归档' || ev.status === '已结束' ? 'status-completed' : 'status-progress'}">${this.esc(ev.status)}</span></td>
                   <td style="display:flex; gap:6px;">
-                    <button class="btn btn-primary btn-sm" onclick="App.openEvent('${ev.id}', 'ticklist')">查看完整档案</button>
-                    <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')">📑 复制为新活动</button>
+                    <button class="btn btn-primary btn-sm" onclick="App.openEvent('${ev.id}', 'ticklist')">查看档案</button>
+                    <button class="btn btn-secondary btn-sm" onclick="App.openCopyEventModal('${ev.id}')">📑 复制</button>
+                    <button class="btn btn-danger btn-sm" onclick="App.openDeleteEventModal('${ev.id}', '${this.esc(ev.name)}')">🗑️</button>
                   </td>
                 </tr>
               `).join('')}
