@@ -61,10 +61,22 @@
 
   function initStore() {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const existing = JSON.parse(raw);
+      let changed = false;
+      if (Array.isArray(existing.users)) {
+        const hadChen = existing.users.some(u => u.name && u.name.includes('陈院长'));
+        if (hadChen) {
+          existing.users = existing.users.map(u => (u.name && u.name.includes('陈院长')) ? { ...u, name: '总院管理员 (Admin)' } : u);
+          changed = true;
+        }
+      }
+      if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+      return existing;
+    }
 
     const users = [
-      { id: 'u-admin', username: 'admin', name: '陈院长 (Principal Tan)', role_id: 'admin', branch: '总院 Main Branch', phone: '012-3456789', can_view_finance: 1, can_view_sensitive_contacts: 1 },
+      { id: 'u-admin', username: 'admin', name: '总院管理员 (Admin)', role_id: 'admin', branch: '总院 Main Branch', phone: '012-3456789', can_view_finance: 1, can_view_sensitive_contacts: 1 },
       { id: 'u-leader1', username: 'lin', name: '林主管 (Ms. Lim)', role_id: 'leader', branch: '总院 Main Branch', phone: '016-8889900', can_view_finance: 1, can_view_sensitive_contacts: 1 },
       { id: 'u-leader2', username: 'wong', name: '黄主任 (Mr. Wong)', role_id: 'leader', branch: 'Setia Alam 分行', phone: '017-2233445', can_view_finance: 0, can_view_sensitive_contacts: 1 },
       { id: 'u-teacher1', username: 'hu', name: '胡老师 (Teacher Hu)', role_id: 'teacher', branch: '总院 Main Branch', phone: '018-3344556', can_view_finance: 0, can_view_sensitive_contacts: 0 },

@@ -4218,7 +4218,7 @@ Object.assign(App, {
                   </td>
                   <td style="display:flex; gap:6px; align-items:center;">
                     <button class="btn btn-secondary btn-sm" onclick="App.switchUser('${u.id}')">以此身份体验</button>
-                    ${isAdmin && u.id !== 'u-admin' && u.id !== this.state.currentUser?.id ? `
+                    ${isAdmin && u.id !== this.state.currentUser?.id ? `
                       <button class="btn btn-danger btn-sm" onclick="App.openDeleteUserModal('${u.id}', '${this.esc(u.name)}')" title="删除老师">🗑️ 删除</button>
                     ` : ''}
                   </td>

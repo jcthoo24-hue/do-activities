@@ -82,7 +82,7 @@ function seedDatabase() {
     INSERT INTO users (id, username, password, name, role_id, branch, phone, email, avatar_color, can_view_finance, can_view_sensitive_contacts)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  insertUser.run('u-admin', 'admin', '5plus1', '陈院长 (Principal Tan)', 'admin', '总院 Main Branch', '012-3456789', 'principal@5plus1.edu.my', '#C8102E', 1, 1);
+  insertUser.run('u-admin', 'admin', '5plus1', '总院管理员 (Admin)', 'admin', '总院 Main Branch', '012-3456789', 'principal@5plus1.edu.my', '#C8102E', 1, 1);
   insertUser.run('u-leader1', 'lin', '5plus1', '林主管 (Ms. Lim)', 'leader', '总院 Main Branch', '016-8889900', 'lim@5plus1.edu.my', '#1D4ED8', 1, 1);
   insertUser.run('u-leader2', 'wong', '5plus1', '黄主任 (Mr. Wong)', 'leader', 'Setia Alam 分行', '017-2233445', 'wong@5plus1.edu.my', '#047857', 0, 1);
   insertUser.run('u-teacher1', 'hu', '5plus1', '胡老师 (Teacher Hu)', 'teacher', '总院 Main Branch', '018-3344556', 'hu@5plus1.edu.my', '#7C3AED', 0, 0);
@@ -567,7 +567,7 @@ function createFullSampleEvent(ev) {
       '家长普遍反映孩子回家后主动分享科学原理，对5+1老师的专业度与耐心非常满意。',
       '最喜欢火山爆发互动环节与领取小礼物环节。',
       '下次签到处分设「本院生快速通道」与「非本院生VIP接待桌」，由专人一对一派发名牌与体验课Voucher。',
-      5, 5, 5, 5, 4, 5, 5, 1, '陈院长 (Principal Tan)', '2026-10-22 16:00:00'
+      5, 5, 5, 5, 4, 5, 5, 1, '总院管理员 (Admin)', '2026-10-22 16:00:00'
     );
   }
 }
